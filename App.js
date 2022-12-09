@@ -1,13 +1,24 @@
 import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Task from './components/Task';
 
 export default function App() {
   const [task, setTask] = useState();
+  const [taskItems, setTaskItems] = useState([]);
 
   const handleAddTask = () => {
-    console.log(task);
+    Keyboard.dismiss()
+    setTaskItems([...taskItems, task])
+    setTask(null);
+  }
+
+  const completeTask = (index) => {
+    let itemsCopy = [...taskItems];
+    //Remove the 1 item in the array and store in back in itemsCopy
+    itemsCopy.splice(index, 1);
+    //Set the taskItems back to itemsCopy which would not include the deleted ones
+    setTaskItems(itemsCopy);
   }
 
   return (
@@ -15,14 +26,24 @@ export default function App() {
 
       {/* Today's Tasks */}
       <View style={styles.tasksWrapper}>
-        <Text style={styles.sectionTitle}>Today's Tasks</Text>
+         <Text style={styles.sectionTitle}>Today's Tasks</Text>
         
         <View style={styles.items}>
           {/* This is where tasks will go */}
-          <Task text={'Task 1'}/>
+
+          {
+            taskItems.map((item, index) => {
+              return (
+                <TouchableOpacity key={index} onPress={() => completeTask()}>
+                    <Task  text={item} />
+                </TouchableOpacity>
+              )                                        
+            })
+          }
+          {/* <Task text={'Grocery Shopping'}/>
           <Task text={'Task 2'}/>
           <Task text={'Task 3'}/>
-          <Task text={'Task 4'}/>
+          <Task text={'Task 4'}/> */}
         </View>
 
       </View>
@@ -32,9 +53,9 @@ export default function App() {
         behavior= {Platform.OS === "ios" ? "padding" : "height"}
         style={styles.writeTaskWrapper}
       >
-        <TextInput style={styles.input} placeholder={'Write a task'} />
+        <TextInput style={styles.input} placeholder={'Write a task'} value={task} onChangeText={text => setTask(text)} />
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => handleAddTask()} >
           <View style={styles.addWrapper}>
             <Text style={styles.addText}>+</Text>
           </View>
